@@ -1,0 +1,47 @@
+.banner {
+  display: flex;
+  gap: var(--space-2);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-size: 13px;
+  margin-bottom: var(--space-5);
+}
+
+.demo {
+  composes: banner;
+  background: color-mix(in srgb, var(--color-warning) 14%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-warning) 40%, var(--color-border));
+  color: var(--color-warning);
+}
+
+.live {
+  composes: banner;
+  background: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 40%, var(--color-border));
+  color: var(--color-accent-strong);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.limitations {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--color-text-muted);
+}
+
+.limitations li {
+  margin: 2px 0;
+}

@@ -1,0 +1,98 @@
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto auto auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.nameText {
+  font-size: 14px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.setText {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.qty {
+  width: 64px;
+}
+
+.price {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  min-width: 76px;
+}
+
+.lineTotal {
+  composes: price;
+  font-weight: 600;
+}
+
+.remove {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.remove:hover {
+  color: var(--color-negative);
+  border-color: var(--color-negative);
+}
+
+.warning {
+  color: var(--color-warning);
+}
+
+@container card-panel (max-width: 620px) {
+  .row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      'name name'
+      'quality language'
+      'foil qty'
+      'price total'
+      'remove remove';
+  }
+
+  .name {
+    grid-area: name;
+  }
+
+  .price {
+    grid-area: price;
+    text-align: left;
+  }
+
+  .lineTotal {
+    grid-area: total;
+    text-align: right;
+  }
+
+  .remove {
+    grid-area: remove;
+    justify-self: end;
+  }
+}

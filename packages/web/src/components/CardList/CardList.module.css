@@ -1,0 +1,71 @@
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  container-type: inline-size;
+  container-name: card-panel;
+}
+
+.header {
+  padding: var(--space-4) var(--space-4) 0;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.headerTitle h2 {
+  font-size: 15px;
+}
+
+.count {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.searchArea {
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.empty {
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+  color: var(--color-text-faint);
+  font-size: 14px;
+}
+
+.columnLabels {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto auto auto;
+  gap: var(--space-3);
+  padding: 0 var(--space-4) var(--space-2);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-faint);
+}
+
+@container card-panel (max-width: 620px) {
+  .columnLabels {
+    display: none;
+  }
+}
+
+.subtotal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  font-size: 14px;
+}
+
+.subtotalValue {
+  font-size: 18px;
+  font-weight: 700;
+}
