@@ -1,6 +1,10 @@
 import type { CardEntryInput, CardPriceResult, GlobalFilters, ListPriceResult } from '@tradr/shared';
 import { summarizeListPrices } from '@tradr/shared';
+import { runWithConcurrencyLimit } from '../cache/concurrencyLimiter.js';
 import type { PricingProvider } from '../providers/PricingProvider.js';
+
+/** Caps how many cards in a list are priced concurrently, to stay polite to rate-limited upstream APIs. */
+const MAX_CONCURRENT_QUOTES = 6;
 
 /**
  * Resolves each card's effective filters (per-card overrides layered on the
@@ -12,7 +16,10 @@ export async function computeListPrice(
   defaults: GlobalFilters,
   entries: CardEntryInput[],
 ): Promise<ListPriceResult> {
-  const items = await Promise.all(entries.map((entry) => priceEntry(provider, defaults, entry)));
+  const items = await runWithConcurrencyLimit(
+    entries.map((entry) => () => priceEntry(provider, defaults, entry)),
+    MAX_CONCURRENT_QUOTES,
+  );
   return summarizeListPrices(items);
 }
 
@@ -29,6 +36,7 @@ async function priceEntry(
 
   const quote = await provider.quoteCardPrice({
     productId: entry.productId,
+    gameId: defaults.gameId,
     minCondition: resolvedFilters.minCondition,
     languageId: resolvedFilters.languageId,
     sellerCountry: defaults.sellerCountry,
@@ -39,12 +47,7 @@ async function priceEntry(
     pricingMethod: defaults.pricingMethod,
   });
 
-  const warning =
-    quote.unitPrice === null
-      ? 'No listings matched the selected filters.'
-      : defaults.pricingMethod !== 'lowest'
-        ? 'Price guide values are not condition/language specific.'
-        : null;
+  const warning = quote.unitPrice === null ? 'No price available for this card with the chosen foiling.' : null;
 
   return {
     id: entry.id,

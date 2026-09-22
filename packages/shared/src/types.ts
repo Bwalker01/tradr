@@ -22,8 +22,13 @@ export interface CardFilterOverrides {
   foil?: boolean;
 }
 
+/**
+ * `productId` is an opaque, source-specific identifier (a numeric Cardmarket
+ * product id, a Scryfall UUID, etc.) — always a string so the app isn't tied
+ * to any one provider's id format.
+ */
 export interface ProductSummary {
-  productId: number;
+  productId: string;
   name: string;
   setName: string | null;
   imageUrl: string | null;
@@ -40,7 +45,7 @@ export interface CardEntry {
 
 export interface CardEntryInput {
   id: string;
-  productId: number;
+  productId: string;
   quantity: number;
   overrides: CardFilterOverrides;
 }
@@ -52,7 +57,7 @@ export interface PriceListRequest {
 
 export interface CardPriceResult {
   id: string;
-  productId: number;
+  productId: string;
   unitPrice: number | null;
   lineTotal: number | null;
   currency: 'EUR';
@@ -71,9 +76,4 @@ export interface ListPriceResult {
   items: CardPriceResult[];
   total: number;
   unresolvedCount: number;
-}
-
-export interface AppMeta {
-  mode: 'live' | 'demo';
-  message: string;
 }

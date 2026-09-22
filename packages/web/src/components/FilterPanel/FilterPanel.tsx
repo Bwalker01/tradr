@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { CONDITIONS, LANGUAGES, PRICING_METHODS, SELLER_COUNTRIES } from '@tradr/shared';
-import { fetchGames, type GameOption } from '../../api/client';
 import { useAppState } from '../../state/AppStateContext';
 import { Select } from '../common/Select';
 import { Toggle } from '../common/Toggle';
@@ -10,14 +9,19 @@ const ANY_COUNTRY = '__any__';
 
 export function FilterPanel() {
   const { state, setDefaults } = useAppState();
-  const { defaults } = state;
-  const [games, setGames] = useState<GameOption[]>([]);
+  const { defaults, games } = state;
+  const currentGame = games.find((g) => g.id === defaults.gameId);
+  const isLive = currentGame?.live ?? false;
 
+  // Live sources only expose a single aggregate market price with no
+  // per-listing seller data, so those filters have nothing to apply to.
   useEffect(() => {
-    fetchGames()
-      .then(({ games: fetched }) => setGames(fetched))
-      .catch(() => setGames([]));
-  }, []);
+    if (!isLive) return;
+    if (defaults.pricingMethod !== 'lowest' || defaults.sellerCountry !== null) {
+      setDefaults({ pricingMethod: 'lowest', sellerCountry: null });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLive]);
 
   return (
     <section className={styles.panel} aria-label="Default filters">
@@ -45,21 +49,31 @@ export function FilterPanel() {
           options={LANGUAGES.map((l) => ({ value: l.id, label: l.label }))}
           onChange={(languageId) => setDefaults({ languageId })}
         />
-        <Select
-          label="Seller location"
-          value={defaults.sellerCountry ?? ANY_COUNTRY}
-          options={[
-            { value: ANY_COUNTRY, label: 'Any country' },
-            ...SELLER_COUNTRIES.map((c) => ({ value: c.code, label: c.label })),
-          ]}
-          onChange={(value) => setDefaults({ sellerCountry: value === ANY_COUNTRY ? null : value })}
-        />
-        <Select
-          label="Pricing basis"
-          value={defaults.pricingMethod}
-          options={PRICING_METHODS.map((m) => ({ value: m.id, label: m.label }))}
-          onChange={(pricingMethod) => setDefaults({ pricingMethod })}
-        />
+        <div title={isLive ? `Not available — ${currentGame?.sourceName} doesn't expose seller-level data.` : undefined}>
+          <Select
+            label="Seller location"
+            value={defaults.sellerCountry ?? ANY_COUNTRY}
+            disabled={isLive}
+            options={[
+              { value: ANY_COUNTRY, label: 'Any country' },
+              ...SELLER_COUNTRIES.map((c) => ({ value: c.code, label: c.label })),
+            ]}
+            onChange={(value) => setDefaults({ sellerCountry: value === ANY_COUNTRY ? null : value })}
+          />
+        </div>
+        <div title={isLive ? `${currentGame?.sourceName} provides a single market price only.` : undefined}>
+          <Select
+            label="Pricing basis"
+            value={defaults.pricingMethod}
+            disabled={isLive}
+            options={
+              isLive
+                ? [{ value: 'lowest' as const, label: `${currentGame?.sourceName} market price` }]
+                : PRICING_METHODS.map((m) => ({ value: m.id, label: m.label }))
+            }
+            onChange={(pricingMethod) => setDefaults({ pricingMethod })}
+          />
+        </div>
       </div>
 
       <div className={styles.toggles}>

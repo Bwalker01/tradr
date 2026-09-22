@@ -1,7 +1,8 @@
 /**
- * Reference data mirrored from Cardmarket's API v2.0 documentation.
- * This is the single source of truth for these values across server and web —
- * never redefine condition codes, language ids, or country codes elsewhere.
+ * Reference data for condition, language, country, and pricing-basis options,
+ * mirrored from Cardmarket's own vocabulary since it's still the target model
+ * even where prices are sourced from elsewhere. This is the single source of
+ * truth for these values across server and web — never redefine them elsewhere.
  */
 
 export interface ConditionOption {
@@ -126,10 +127,38 @@ export const DEFAULT_PRICING_METHOD: PricingMethod = 'lowest';
 export const DEFAULT_MIN_CONDITION: ConditionCode = 'EX';
 export const DEFAULT_LANGUAGE_ID = 1;
 
-/** Fallback game catalogue used only when the Cardmarket API is unreachable/unconfigured. */
-export const FALLBACK_GAMES: readonly { id: number; name: string; abbreviation: string }[] = [
-  { id: 1, name: 'Magic the Gathering', abbreviation: 'MTG' },
-  { id: 2, name: 'Yu-Gi-Oh!', abbreviation: 'YGO' },
-  { id: 3, name: 'Pokémon', abbreviation: 'POKE' },
-  { id: 4, name: 'Flesh and Blood', abbreviation: 'FAB' },
+export interface GameCatalogEntry {
+  id: number;
+  name: string;
+  abbreviation: string;
+  /** True when this game is backed by a real pricing source rather than the demo mock. */
+  live: boolean;
+  /** Human-readable name of the data source powering live prices, if any. */
+  sourceName: string | null;
+  /** Caveats to surface in the UI about what this source can't do (e.g. no per-listing filtering). */
+  limitations: readonly string[];
+}
+
+const SCRYFALL_LIMITATIONS: readonly string[] = [
+  "Prices are Scryfall's Cardmarket-sourced market value, not a specific seller listing — quality and language filters are informational only and don't change the price shown.",
+  'Seller location filtering is not available for this data source.',
+];
+
+/**
+ * Every game the app knows about, and how its prices are sourced. This is the
+ * single source of truth for game selection and for what each game's pricing
+ * can and can't do — never duplicate this list elsewhere.
+ */
+export const GAME_CATALOG: readonly GameCatalogEntry[] = [
+  {
+    id: 1,
+    name: 'Magic the Gathering',
+    abbreviation: 'MTG',
+    live: true,
+    sourceName: 'Scryfall',
+    limitations: SCRYFALL_LIMITATIONS,
+  },
+  { id: 2, name: 'Yu-Gi-Oh!', abbreviation: 'YGO', live: false, sourceName: null, limitations: [] },
+  { id: 3, name: 'Pokémon', abbreviation: 'POKE', live: false, sourceName: null, limitations: [] },
+  { id: 4, name: 'Flesh and Blood', abbreviation: 'FAB', live: false, sourceName: null, limitations: [] },
 ];

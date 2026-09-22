@@ -1,11 +1,19 @@
-import { createContext, useContext, useMemo, useReducer } from 'react';
+import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
 import type { ReactNode } from 'react';
 import {
   DEFAULT_LANGUAGE_ID,
   DEFAULT_MIN_CONDITION,
   DEFAULT_PRICING_METHOD,
 } from '@tradr/shared';
-import type { CardEntry, CardFilterOverrides, GlobalFilters, ListMode, ProductSummary } from '@tradr/shared';
+import type {
+  CardEntry,
+  CardFilterOverrides,
+  GameCatalogEntry,
+  GlobalFilters,
+  ListMode,
+  ProductSummary,
+} from '@tradr/shared';
+import { fetchGames } from '../api/client';
 
 export type ListKey = 'A' | 'B';
 
@@ -13,6 +21,8 @@ interface AppState {
   mode: ListMode;
   defaults: GlobalFilters;
   lists: Record<ListKey, CardEntry[]>;
+  /** The app's game catalogue, fetched once — the single source for per-game live/demo status. */
+  games: GameCatalogEntry[];
 }
 
 const initialFilters: GlobalFilters = {
@@ -31,11 +41,13 @@ const initialState: AppState = {
   mode: 'buy',
   defaults: initialFilters,
   lists: { A: [], B: [] },
+  games: [],
 };
 
 type Action =
   | { type: 'SET_MODE'; mode: ListMode }
   | { type: 'SET_DEFAULTS'; patch: Partial<GlobalFilters> }
+  | { type: 'SET_GAMES'; games: GameCatalogEntry[] }
   | { type: 'ADD_CARD'; list: ListKey; product: ProductSummary; overrides: CardFilterOverrides }
   | { type: 'UPDATE_QUANTITY'; list: ListKey; id: string; quantity: number }
   | { type: 'UPDATE_OVERRIDES'; list: ListKey; id: string; overrides: CardFilterOverrides }
@@ -50,6 +62,9 @@ function reducer(state: AppState, action: Action): AppState {
 
     case 'SET_DEFAULTS':
       return { ...state, defaults: { ...state.defaults, ...action.patch } };
+
+    case 'SET_GAMES':
+      return { ...state, games: action.games };
 
     case 'ADD_CARD': {
       const entry: CardEntry = {
@@ -125,6 +140,12 @@ const AppStateContext = createContext<AppStateContextValue | null>(null);
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    fetchGames()
+      .then(({ games }) => dispatch({ type: 'SET_GAMES', games }))
+      .catch(() => dispatch({ type: 'SET_GAMES', games: [] }));
+  }, []);
 
   const value = useMemo<AppStateContextValue>(
     () => ({

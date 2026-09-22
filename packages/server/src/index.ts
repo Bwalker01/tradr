@@ -6,7 +6,6 @@ import { config } from './config.js';
 import { gamesRouter } from './routes/games.js';
 import { searchRouter } from './routes/search.js';
 import { priceRouter } from './routes/price.js';
-import { metaRouter } from './routes/meta.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -20,7 +19,6 @@ app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api/games', gamesRouter);
 app.use('/api/search', searchRouter);
 app.use('/api/price', priceRouter);
-app.use('/api/meta', metaRouter);
 
 const webDistPath = path.resolve(__dirname, '../../web/dist');
 app.use(express.static(webDistPath));

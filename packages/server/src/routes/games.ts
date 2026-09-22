@@ -1,14 +1,8 @@
 import { Router } from 'express';
-import { getPricingProvider } from '../providers/index.js';
-import { asyncHandler } from '../middleware/errorHandler.js';
+import { GAME_CATALOG } from '@tradr/shared';
 
 export const gamesRouter = Router();
 
-gamesRouter.get(
-  '/',
-  asyncHandler(async (_req, res) => {
-    const provider = getPricingProvider();
-    const games = await provider.getGames();
-    res.json({ games });
-  }),
-);
+gamesRouter.get('/', (_req, res) => {
+  res.json({ games: GAME_CATALOG });
+});

@@ -23,7 +23,7 @@ export const globalFiltersSchema = z.object({
 
 export const cardEntryInputSchema = z.object({
   id: z.string().min(1),
-  productId: z.number().int().positive(),
+  productId: z.string().min(1),
   quantity: z.number().int().min(1).max(999),
   overrides: cardFilterOverridesSchema,
 });

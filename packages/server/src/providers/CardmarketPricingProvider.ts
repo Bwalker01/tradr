@@ -3,7 +3,7 @@ import { CONDITIONS, meetsMinCondition } from '@tradr/shared';
 import { MkmClient } from '../cardmarket/mkmClient.js';
 import type { MkmArticle } from '../cardmarket/types.js';
 import { TtlCache } from '../cache/ttlCache.js';
-import type { CardPriceQuery, CardPriceQuote, GameOption, PricingProvider } from './PricingProvider.js';
+import type { CardPriceQuery, CardPriceQuote, PricingProvider } from './PricingProvider.js';
 
 const CONDITION_CODES = new Set(CONDITIONS.map((c) => c.code));
 
@@ -18,25 +18,14 @@ export interface CardmarketPricingProviderOptions {
 
 /** Live pricing backed by the real Cardmarket API. */
 export class CardmarketPricingProvider implements PricingProvider {
-  readonly mode = 'live' as const;
-
-  private readonly gamesCache: TtlCache<GameOption[]>;
   private readonly searchCache: TtlCache<ProductSummary[]>;
   private readonly articlesCache: TtlCache<MkmArticle[]>;
   private readonly trendCache: TtlCache<Record<string, number>>;
 
   constructor(private readonly options: CardmarketPricingProviderOptions) {
-    this.gamesCache = new TtlCache(options.cacheTtlSeconds);
     this.searchCache = new TtlCache(options.cacheTtlSeconds);
     this.articlesCache = new TtlCache(options.cacheTtlSeconds);
     this.trendCache = new TtlCache(options.cacheTtlSeconds);
-  }
-
-  async getGames(): Promise<GameOption[]> {
-    return this.gamesCache.getOrLoad('games', async () => {
-      const response = await this.options.client.getGames();
-      return response.game.map((g) => ({ id: g.idGame, name: g.name, abbreviation: g.abbreviation }));
-    });
   }
 
   async searchProducts(query: string, gameId: number): Promise<ProductSummary[]> {
@@ -46,7 +35,7 @@ export class CardmarketPricingProvider implements PricingProvider {
     return this.searchCache.getOrLoad(`${gameId}:${trimmed.toLowerCase()}`, async () => {
       const response = await this.options.client.findProducts(trimmed, gameId);
       return response.product.map((p) => ({
-        productId: p.idProduct,
+        productId: String(p.idProduct),
         name: p.name,
         setName: p.expansionName ?? null,
         imageUrl: p.image ?? null,
@@ -63,15 +52,11 @@ export class CardmarketPricingProvider implements PricingProvider {
   }
 
   private async quoteFromListings(query: CardPriceQuery): Promise<CardPriceQuote> {
-    const cacheKey = [
-      query.productId,
-      query.minCondition,
-      query.languageId,
-      query.foil,
-    ].join(':');
+    const productId = Number(query.productId);
+    const cacheKey = [productId, query.minCondition, query.languageId, query.foil].join(':');
 
     const articles = await this.articlesCache.getOrLoad(cacheKey, async () => {
-      const response = await this.options.client.getArticles(query.productId, {
+      const response = await this.options.client.getArticles(productId, {
         idLanguage: query.languageId,
         minCondition: query.minCondition,
         isFoil: query.foil,
@@ -101,8 +86,9 @@ export class CardmarketPricingProvider implements PricingProvider {
   }
 
   private async quoteFromTrend(query: CardPriceQuery): Promise<CardPriceQuote> {
-    const trendValues = await this.trendCache.getOrLoad(`trend:${query.productId}`, async () => {
-      const response = await this.options.client.getProduct(query.productId);
+    const productId = Number(query.productId);
+    const trendValues = await this.trendCache.getOrLoad(`trend:${productId}`, async () => {
+      const response = await this.options.client.getProduct(productId);
       const guide = response.product.priceGuide ?? {};
       return {
         trend: guide.TREND ?? 0,

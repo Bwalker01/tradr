@@ -1,6 +1,6 @@
 import type { ProductSummary } from '@tradr/shared';
-import { CONDITION_RANK, FALLBACK_GAMES } from '@tradr/shared';
-import type { CardPriceQuery, CardPriceQuote, GameOption, PricingProvider } from './PricingProvider.js';
+import { CONDITION_RANK } from '@tradr/shared';
+import type { CardPriceQuery, CardPriceQuote, PricingProvider } from './PricingProvider.js';
 
 const DEMO_CARD_NAMES = [
   'Lightning Bolt',
@@ -23,12 +23,6 @@ const DEMO_CARD_NAMES = [
  * prices are pseudo-random but stable per product/filter combination.
  */
 export class MockPricingProvider implements PricingProvider {
-  readonly mode = 'demo' as const;
-
-  async getGames(): Promise<GameOption[]> {
-    return FALLBACK_GAMES.map((g) => ({ id: g.id, name: g.name, abbreviation: g.abbreviation }));
-  }
-
   async searchProducts(query: string, gameId: number): Promise<ProductSummary[]> {
     const trimmed = query.trim().toLowerCase();
     if (trimmed.length < 2) return [];
@@ -56,12 +50,12 @@ export class MockPricingProvider implements PricingProvider {
   }
 }
 
-function hashToProductId(name: string, gameId: number): number {
+function hashToProductId(name: string, gameId: number): string {
   let hash = gameId * 7919;
   for (let i = 0; i < name.length; i += 1) {
     hash = (hash * 31 + name.charCodeAt(i)) % 1_000_000;
   }
-  return hash;
+  return String(hash);
 }
 
 /** Deterministic pseudo-random float in [0, 1) derived from a string seed. */

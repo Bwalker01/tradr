@@ -1,4 +1,4 @@
-import type { AppMeta, GlobalFilters, ListPriceResult, ProductSummary, CardEntryInput } from '@tradr/shared';
+import type { GameCatalogEntry, GlobalFilters, ListPriceResult, ProductSummary, CardEntryInput } from '@tradr/shared';
 
 /** All backend calls go through this module — no fetch() calls elsewhere. */
 
@@ -16,18 +16,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
-export interface GameOption {
-  id: number;
-  name: string;
-  abbreviation: string;
-}
-
-export function fetchGames(): Promise<{ games: GameOption[] }> {
+export function fetchGames(): Promise<{ games: GameCatalogEntry[] }> {
   return request('/games');
-}
-
-export function fetchMeta(): Promise<AppMeta> {
-  return request('/meta');
 }
 
 export function searchCards(query: string, gameId: number): Promise<{ results: ProductSummary[] }> {

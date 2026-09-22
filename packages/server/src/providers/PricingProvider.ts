@@ -1,21 +1,8 @@
 import type { ConditionCode, ProductSummary } from '@tradr/shared';
 
-export interface GameOption {
-  id: number;
-  name: string;
-  abbreviation: string;
-}
-
-export interface ArticleQuote {
-  price: number;
-  condition: ConditionCode;
-  languageId: number;
-  isFoil: boolean;
-  sellerCountry: string | null;
-}
-
 export interface CardPriceQuery {
-  productId: number;
+  productId: string;
+  gameId: number;
   minCondition: ConditionCode;
   languageId: number;
   sellerCountry: string | null;
@@ -32,13 +19,12 @@ export interface CardPriceQuote {
 }
 
 /**
- * Source of card pricing data. Implementations must not leak
- * transport-specific details (HTTP, OAuth, etc.) past this boundary, so the
- * rest of the app can depend on a single stable contract.
+ * Source of card pricing data for a single game (or family of games).
+ * Implementations must not leak transport-specific details (HTTP, OAuth,
+ * etc.) past this boundary, so the rest of the app can depend on a single
+ * stable contract regardless of which backend actually serves a given game.
  */
 export interface PricingProvider {
-  readonly mode: 'live' | 'demo';
-  getGames(): Promise<GameOption[]>;
   searchProducts(query: string, gameId: number): Promise<ProductSummary[]>;
   quoteCardPrice(query: CardPriceQuery): Promise<CardPriceQuote>;
 }

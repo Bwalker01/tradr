@@ -1,7 +1,7 @@
 import { AppStateProvider, useAppState } from './state/AppStateContext';
 import { useListPricing } from './hooks/useListPricing';
 import { Header } from './components/Header/Header';
-import { DemoModeBanner } from './components/DemoModeBanner/DemoModeBanner';
+import { SourceBanner } from './components/SourceBanner/SourceBanner';
 import { FilterPanel } from './components/FilterPanel/FilterPanel';
 import { CardList } from './components/CardList/CardList';
 import { TotalsPanel } from './components/Totals/TotalsPanel';
@@ -16,7 +16,7 @@ function Calculator() {
     <div className={styles.app}>
       <Header />
       <div className={styles.layout}>
-        <DemoModeBanner />
+        <SourceBanner />
         <FilterPanel />
 
         {state.mode === 'buy' ? (
