@@ -1,0 +1,22 @@
+{
+  "name": "tradr",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Cardmarket pricing calculator for trade and buy list valuation",
+  "workspaces": [
+    "packages/shared",
+    "packages/server",
+    "packages/web"
+  ],
+  "scripts": {
+    "build": "npm run build -w @tradr/shared && npm run build -w @tradr/web && npm run build -w @tradr/server",
+    "start": "npm run start -w @tradr/server",
+    "dev:server": "npm run dev -w @tradr/server",
+    "dev:web": "npm run dev -w @tradr/web",
+    "lint": "npm run lint -w @tradr/server && npm run lint -w @tradr/web",
+    "typecheck": "npm run typecheck -w @tradr/shared && npm run typecheck -w @tradr/server && npm run typecheck -w @tradr/web"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  }
+}

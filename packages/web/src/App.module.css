@@ -1,0 +1,32 @@
+.app {
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+  padding: 0 var(--space-5) var(--space-7);
+}
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.lists {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+}
+
+.listsTrade {
+  composes: lists;
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 860px) {
+  .listsTrade {
+    grid-template-columns: 1fr;
+  }
+
+  .app {
+    padding: 0 var(--space-4) var(--space-6);
+  }
+}
